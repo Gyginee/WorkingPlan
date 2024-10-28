@@ -1,0 +1,54 @@
+﻿@model IEnumerable<WorkingPlan.Models.WorkingPlanModel>
+
+@{
+    ViewData["Title"] = "Working Plans";
+}
+
+<h1>Working Plans</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+    <a asp-action="ExportData" class="btn btn-outline-secondary">Export</a>
+    <input type="button" value="ExportData" onclick="location.href='@Url.Action("ExportData", "WorkingPlanViewController")'" />
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ShopCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().PlanDate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().EmployeeCode)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ShopCode)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.PlanDate)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.EmployeeCode)
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="4">No data available.</td>
+            </tr>
+        }
+    </tbody>
+</table>
