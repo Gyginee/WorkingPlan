@@ -15,14 +15,16 @@ namespace WorkingPlan.Repository
             _connection = connection;
         }
 
-        // Lấy kế hoạch làm việc theo tháng
-        public async Task<WorkingPlanModel> GetWorkingPlanByMonth(int month, int year, int pageSize, int pageNumber)
+        // Lấy WorkingPlans theo tháng có page
+        public async Task<IEnumerable<WorkingPlanModel>> GetWorkingPlanByMonth(int month, int year, int pageSize, int pageNumber)
         {
-            var workingPlan = await _connection.QuerySingleOrDefaultAsync<WorkingPlanModel>("GetWorkingPlanByMonth", new { Month = month, Year = year, PageSize = pageSize, PageNumber = pageNumber }, commandType: CommandType.StoredProcedure);
+            var workingPlan = await _connection.QueryAsync<WorkingPlanModel>("GetWorkingPlanByMonth", 
+            new { Month = month, Year = year, PageSize = pageSize, PageNumber = pageNumber }, 
+            commandType: CommandType.StoredProcedure);
             return workingPlan;
         }
 
-        // Lấy danh sách các kế hoạch làm việc theo tháng và năm
+        // Lấy danh sách WorkingPlans theo tháng và năm
         public async Task<IEnumerable<WorkingPlanModel>> GetWorkingPlansByMonthAndYear(int month, int year, int pageSize, int pageNumber)
         {
             var workingPlans = await _connection.QueryAsync<WorkingPlanModel>(
@@ -33,7 +35,7 @@ namespace WorkingPlan.Repository
             return workingPlans;
         }
 
-        // Lấy tất cả các kế hoạch làm việc
+        // Lấy tất cả WorkingPlans
         public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlans(int pageSize, int pageNumber)
         {
             var query = "SELECT * FROM WorkingPlan ORDER BY PlanDate OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
@@ -41,7 +43,7 @@ namespace WorkingPlan.Repository
             return workingPlans;
         }
 
-        // Lấy tất cả các kế hoạch làm việc theo tháng
+        // Lấy tất cả WorkingPlans theo tháng
         public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlanByMonth(int month, int year)
         {
             var query = "SELECT ShopCode, PlanDate, EmployeeCode FROM WorkingPlan WHERE YEAR(PlanDate) = @Year AND MONTH(PlanDate) = @Month ORDER BY PlanDate";

@@ -10,6 +10,7 @@ builder.Services.AddTransient<IDbConnection>(db => new SqlConnection(
 
 // Register Repository for dependency injection
 builder.Services.AddScoped<WorkingPlan.Repository.WorkingPlanRepository>();
+builder.Services.AddScoped<Attendant.Repository.AttendantRepository>();
 
 builder.Services.AddControllersWithViews();
 
