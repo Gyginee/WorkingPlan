@@ -1,11 +1,6 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
-using System.IO;
+﻿using Microsoft.AspNetCore.Mvc;
 using WorkingPlan.Models;
 using WorkingPlan.Repository;
-using System.Data;
-using SuperConvert.Extensions;
-
 
 namespace WorkingPlan.Controllers
 {
@@ -20,18 +15,11 @@ namespace WorkingPlan.Controllers
             _workingplanRepository = workingplanRepository;
         }
 
-        // GET: api/product
+        // GET: api/WorkingPlan
         [HttpGet]
-        public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlans(int pageSize, int pageNumber)
+        public async Task<ActionResult<IEnumerable<WorkingPlanModel>>> GetAllWorkingPlans(int pageSize, int pageNumber)
         {
-            return await _workingplanRepository.GetAllWorkingPlans(pageSize, pageNumber);
-        }
-
-        // GET Month
-        [HttpGet("{month:int}")]
-        public async Task<ActionResult<IEnumerable<WorkingPlanModel>>> GetAllWorkingPlanByMonth(int month)
-        {
-            var data = await _workingplanRepository.GetAllWorkingPlanByMonth(month);
+            var data = await _workingplanRepository.GetAllWorkingPlans(pageSize, pageNumber);
             if (data == null || !data.Any())
             {
                 return NotFound();
@@ -39,6 +27,28 @@ namespace WorkingPlan.Controllers
             return Ok(data);
         }
 
+        // GET: api/WorkingPlan/{month}
+        [HttpGet("{month:int}/{year:int}")]
+        public async Task<ActionResult<IEnumerable<WorkingPlanModel>>> GetWorkingPlansByMonth(int month, int year)
+        {
+            var data = await _workingplanRepository.GetAllWorkingPlanByMonth(month, year);
+            if (data == null || !data.Any())
+            {
+                return NotFound();
+            }
+            return Ok(data);
+        }
         
+        // GET: api/WorkingPlan/ByMonth
+        [HttpGet("ByMonth/{month:int}/{year:int}/{pageSize:int}/{pageNumber:int}")]
+        public async Task<ActionResult<IEnumerable<WorkingPlanModel>>> GetWorkingPlans(int month, int year, int pageSize, int pageNumber)
+        {
+            var data = await _workingplanRepository.GetWorkingPlansByMonthAndYear(month, year, pageSize, pageNumber);
+            if (data == null || !data.Any())
+            {
+                return NotFound();
+            }
+            return Ok(data);
+        }
     }
 }

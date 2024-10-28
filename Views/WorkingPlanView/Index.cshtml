@@ -4,51 +4,97 @@
     ViewData["Title"] = "Working Plans";
 }
 
-<h1>Working Plans</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1>Working Plans</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <form id="searchForm" asp-action="Index" method="get">
+                <div class="form-actions no-color">
+                    <p>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p>Month</p>
+                                <select name="month" id="monthSelect"
+                                    asp-items="@(new SelectList(Enumerable.Range(1, 12).Select(m => new { Value = m, Text = m.ToString() }), "Value", "Text", ViewBag.SelectedMonth))"
+                                    class="form-control">
+                                    <option value="">Select Month</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <p>Year</p>
+                                @* Hiển thị từ năm hiện tại trừ đi 7 năm đến năm hiện tại *@
+                                <select name="year" id="yearSelect"
+                                    asp-items="@(new SelectList(Enumerable.Range(DateTime.Now.Year - 7, 8).Select(y => new { Value = y, Text = y.ToString() }), "Value", "Text", ViewBag.SelectedYear))"
+                                    class="form-control">
+                                    <option value="">Select Year</option>
+                                </select>
+                            </div>
+                        </div>
+                        <input type="submit" value="Search" class="btn btn-primary mt-3" />
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.ShopCode)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.PlanDate)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.EmployeeCode)
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        // Lọc dữ liệu dựa trên tháng và năm được chọn
+                        var filteredModel = Model.Where(item => item.PlanDate.Month == ViewBag.SelectedMonth && item.PlanDate.Year == ViewBag.SelectedYear);
+                        
+                        @foreach (var item in filteredModel)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.ShopCode)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.PlanDate)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.EmployeeCode)
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3">No data available.</td>
+                        </tr>
+                    }
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
-    <a asp-action="ExportData" class="btn btn-outline-secondary">Export</a>
-    <input type="button" value="ExportData" onclick="location.href='@Url.Action("ExportData", "WorkingPlanViewController")'" />
-</p>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12">
+            <p>
+                <a asp-action="ExportJsonToXls" asp-route-month="@ViewBag.SelectedMonth"
+                 asp-route-year="@ViewBag.SelectedYear" class="btn btn-outline-secondary">Export</a>
+            </p>
+        </div>
+    </div>
+</div>
 
-<table class="table table-striped">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.First().ShopCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().PlanDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().EmployeeCode)
-            </th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model != null && Model.Any())
-        {
-            @foreach (var item in Model)
-            {
-                <tr>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.ShopCode)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.PlanDate)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.EmployeeCode)
-                    </td>
-                </tr>
-            }
-        }
-        else
-        {
-            <tr>
-                <td colspan="4">No data available.</td>
-            </tr>
-        }
-    </tbody>
-</table>

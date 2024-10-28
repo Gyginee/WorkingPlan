@@ -4,63 +4,49 @@ using Dapper;
 using Dapper.Contrib.Extensions;
 using System.Drawing.Printing;
 
-
 namespace WorkingPlan.Repository
 {
     public class WorkingPlanRepository
     {
-        public readonly IDbConnection _connection;
+        private readonly IDbConnection _connection;
 
         public WorkingPlanRepository(IDbConnection connection)
         {
             _connection = connection;
         }
 
-        // Get WorkingPlanByMonth
-        public async Task<WorkingPlanModel> GetWorkingPlanByMonth(int month, int pageSize, int pageNumber)
+        // Lấy kế hoạch làm việc theo tháng
+        public async Task<WorkingPlanModel> GetWorkingPlanByMonth(int month, int year, int pageSize, int pageNumber)
         {
-            var workingPlan = await _connection.QuerySingleOrDefaultAsync<WorkingPlanModel>("GetWorkingPlanByMonth", new
-            {
-                Month = month,
-                PageSize = pageSize,
-                PageNumber = pageNumber
-            }, commandType: CommandType.StoredProcedure);
+            var workingPlan = await _connection.QuerySingleOrDefaultAsync<WorkingPlanModel>("GetWorkingPlanByMonth", new { Month = month, Year = year, PageSize = pageSize, PageNumber = pageNumber }, commandType: CommandType.StoredProcedure);
             return workingPlan;
         }
 
-        // GET All By Month
-        public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlans(int pageSize, int pageNumber)
+        // Lấy danh sách các kế hoạch làm việc theo tháng và năm
+        public async Task<IEnumerable<WorkingPlanModel>> GetWorkingPlansByMonthAndYear(int month, int year, int pageSize, int pageNumber)
         {
-            var workingPlans = await _connection.QueryAsync<WorkingPlanModel>("GetAllWorkingPlanWithPagination", new
-            {
-                PageSize = pageSize,
-                PageNumber = pageNumber
-            }, commandType: CommandType.StoredProcedure);
+            var workingPlans = await _connection.QueryAsync<WorkingPlanModel>(
+                "GetWorkingPlanByMonthAndYear", 
+                new { Month = month, Year = year, PageSize = pageSize, PageNumber = pageNumber }, 
+                commandType: CommandType.StoredProcedure
+            );
             return workingPlans;
         }
 
-        public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlanByMonth(int month)
+        // Lấy tất cả các kế hoạch làm việc
+        public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlans(int pageSize, int pageNumber)
         {
-            var query = "SELECT ShopCode, PlanDate, EmployeeCode FROM WorkingPlan WHERE MONTH(PlanDate) = MONTH(@Month)";
-            return await _connection.QueryAsync<WorkingPlanModel>(query, new { Month = month });
-        }
-        public async Task AddWorkingPlan(WorkingPlanModel workingPlan)
-        {
-            await _connection.InsertAsync(workingPlan);
+            var query = "SELECT * FROM WorkingPlan ORDER BY PlanDate OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+            var workingPlans = await _connection.QueryAsync<WorkingPlanModel>(query, new { Offset = (pageNumber - 1) * pageSize, PageSize = pageSize });
+            return workingPlans;
         }
 
-        public async Task UpdateWorkingPlan(WorkingPlanModel workingPlan)
+        // Lấy tất cả các kế hoạch làm việc theo tháng
+        public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlanByMonth(int month, int year)
         {
-            await _connection.UpdateAsync(workingPlan);
-        }
-
-        public async Task DeleteWorkingPlan(int id)
-        {
-            var workingPlan = await _connection.GetAsync<WorkingPlanModel>(id);
-            if (workingPlan != null)
-            {
-                await _connection.DeleteAsync(workingPlan);
-            }
+            var query = "SELECT ShopCode, PlanDate, EmployeeCode FROM WorkingPlan WHERE YEAR(PlanDate) = @Year AND MONTH(PlanDate) = @Month ORDER BY PlanDate";
+            var workingPlans = await _connection.QueryAsync<WorkingPlanModel>(query, new { Month = month, Year = year });
+            return workingPlans;
         }
     }
 }

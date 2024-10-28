@@ -31,6 +31,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=WorkingPlanView}/{action=Index}/{id?}");
+    pattern: "{controller=WorkingPlanView}/{action=Index}/{page?}");
 
 app.Run();
