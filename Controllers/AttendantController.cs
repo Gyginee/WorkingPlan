@@ -53,8 +53,7 @@ namespace Attendant.Controllers
                 var headerRow = sheet.CreateRow(0);
                 headerRow.CreateCell(0).SetCellValue("EmployeeCode");
                 headerRow.GetCell(0).CellStyle = headerCellStyle;
-              
-
+               
                 int daysInMonth = DateTime.DaysInMonth(year, month);
                 for (int day = 1; day <= daysInMonth; day++)
                 {

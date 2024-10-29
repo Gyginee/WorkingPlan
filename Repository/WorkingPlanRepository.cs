@@ -25,7 +25,7 @@ namespace WorkingPlan.Repository
             );
             return workingPlans;
         }
-
+        #if
 
         // Lấy tất cả WorkingPlans theo tháng
         public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlanByMonth(int month, int year)

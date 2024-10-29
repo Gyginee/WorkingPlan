@@ -47,7 +47,7 @@ AS BEGIN
 END
 GO
 
---GetWorkingPlanInMonthWithPage
+--GetWorkingPlanInMonthWithPage 
 CREATE PROCEDURE [dbo].[GetWorkingPlanInMonth]
  @Month INT,
  @PageSize INT,
@@ -66,5 +66,21 @@ CREATE PROCEDURE [dbo].[GetWorkingPlanInMonth]
 	ORDER BY PlanDate
 	OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY
 
+END
+GO
+
+--Get All WorkingPlan By Year and Month
+CREATE PROCEDURE [dbo].[GetAllWorkingPlanByMonth]
+	@Month INT,
+	@Year INT
+AS
+BEGIN
+	SET NOCOUNT ON;
+	SELECT ShopCode,
+	PlanDate,
+	EmployeeCode
+	FROM WorkingPlan
+	WHERE YEAR(PlanDate) = @Year AND MONTH(PlanDate) = @Month
+	ORDER BY PlanDate
 END
 GO
