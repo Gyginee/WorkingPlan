@@ -2,8 +2,6 @@
 using System.Diagnostics;
 using WorkingPlan.Models;
 using WorkingPlan.Repository;
-using System.IO;
-using OfficeOpenXml;
 using NPOI.XSSF.UserModel;
 using NPOI.HSSF.Util;
 using NPOI.SS.UserModel;
@@ -14,9 +12,9 @@ namespace WorkingPlan.Controllers
     public class WorkingPlanViewController : Controller
     {
         private readonly ILogger<WorkingPlanViewController> _logger;
-        private readonly WorkingPlanRepository _workingPlanRepository; 
+        private readonly WorkingPlanRepository _workingPlanRepository;
 
-        public WorkingPlanViewController(ILogger<WorkingPlanViewController> logger, WorkingPlanRepository workingPlanRepository) 
+        public WorkingPlanViewController(ILogger<WorkingPlanViewController> logger, WorkingPlanRepository workingPlanRepository)
         {
             _logger = logger;
             _workingPlanRepository = workingPlanRepository;
@@ -28,11 +26,11 @@ namespace WorkingPlan.Controllers
             ViewBag.SelectedMonth = month ?? DateTime.Now.Month;
             ViewBag.SelectedYear = year ?? DateTime.Now.Year;
 
-           
+
             var workingPlans = await _workingPlanRepository.GetWorkingPlansByMonthAndYear(
-                ViewBag.SelectedMonth, 
-                ViewBag.SelectedYear, 
-                pageSize.HasValue ? pageSize.Value : 15, 
+                ViewBag.SelectedMonth,
+                ViewBag.SelectedYear,
+                pageSize.HasValue ? pageSize.Value : 15,
                 pageNumber.HasValue ? pageNumber.Value : 1
             );
 
@@ -40,10 +38,10 @@ namespace WorkingPlan.Controllers
         }
 
         // Xuất file excel tất cả các data trong tháng
-        public async Task<IActionResult> ExportJsonToXls(int month, int year) 
+        public async Task<IActionResult> ExportJsonToXls(int month, int year)
         {
-            var allwplan = await _workingPlanRepository.GetAllWorkingPlanByMonth(month, year); 
-            
+            var allwplan = await _workingPlanRepository.GetAllWorkingPlanByMonth(month, year);
+
             using (var workbook = new XSSFWorkbook())
             {
                 var sheet = workbook.CreateSheet("WorkingPlans");
@@ -80,11 +78,57 @@ namespace WorkingPlan.Controllers
                 {
                     workbook.Write(stream);
                     var fileName = $"WorkingPlans_{month}_{year}.xlsx";
-                    
+
                     return File(stream.ToArray(), "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
                 }
             }
         }
+        //PENDING
+        public async Task<IActionResult> ExportWorkingPlanByDay(int month, int year)
+        {
+            var allWorkingPlan = await _workingPlanRepository.GetAllWorkingPlanByMonth(month, year);
+            using (var workbook = new XSSFWorkbook())
+            {
+                var sheet = workbook.CreateSheet("WorkingPlans");
+                var row = sheet.CreateRow(0);
+                row.CreateCell(0).SetCellValue("EmployeeCode");
 
+                int daysInMonth = DateTime.DaysInMonth(year, month);
+
+                for (int day = 1; day <= daysInMonth; daysInMonth++)
+                {
+                    row.CreateCell(day).SetCellValue($"{day}-{month}-{year}");
+                }
+                var addedEmployees = new Dictionary<string, int>();
+                int rowIndex = 1;
+
+                foreach (var workingplan in allWorkingPlan)
+                {
+                    string employeeCode = workingplan.EmployeeCode;
+
+                    if (!addedEmployees.ContainsKey(employeeCode))
+                    {
+                        var rowData = sheet.CreateRow(rowIndex++);
+                        rowData.CreateCell(0).SetCellValue(employeeCode);
+                        addedEmployees[employeeCode] = rowIndex - 1;
+                    }
+
+                    int existingRowIndex = addedEmployees[employeeCode];
+                    var existingRow = sheet.GetRow(existingRowIndex);
+
+                    int day = workingplan.PlanDate.Day;
+                    existingRow.CreateCell(day).SetCellValue("x");
+
+                }
+                // Save the workbook to a memory stream
+                using (var stream = new MemoryStream())
+                {
+                    workbook.Write(stream);
+                    var fileName = $"WorkingPlanNew_{month}_{year}.xlsx";
+                    var content = stream.ToArray();
+                    return File(content, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+                }
+            }
+        }
     }
 }

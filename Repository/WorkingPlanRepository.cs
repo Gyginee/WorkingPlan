@@ -15,15 +15,6 @@ namespace WorkingPlan.Repository
             _connection = connection;
         }
 
-        // Lấy WorkingPlans theo tháng có page
-        public async Task<IEnumerable<WorkingPlanModel>> GetWorkingPlanByMonth(int month, int year, int pageSize, int pageNumber)
-        {
-            var workingPlan = await _connection.QueryAsync<WorkingPlanModel>("GetWorkingPlanByMonth", 
-            new { Month = month, Year = year, PageSize = pageSize, PageNumber = pageNumber }, 
-            commandType: CommandType.StoredProcedure);
-            return workingPlan;
-        }
-
         // Lấy danh sách WorkingPlans theo tháng và năm
         public async Task<IEnumerable<WorkingPlanModel>> GetWorkingPlansByMonthAndYear(int month, int year, int pageSize, int pageNumber)
         {
@@ -35,19 +26,15 @@ namespace WorkingPlan.Repository
             return workingPlans;
         }
 
-        // Lấy tất cả WorkingPlans
-        public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlans(int pageSize, int pageNumber)
-        {
-            var query = "SELECT * FROM WorkingPlan ORDER BY PlanDate OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-            var workingPlans = await _connection.QueryAsync<WorkingPlanModel>(query, new { Offset = (pageNumber - 1) * pageSize, PageSize = pageSize });
-            return workingPlans;
-        }
 
         // Lấy tất cả WorkingPlans theo tháng
         public async Task<IEnumerable<WorkingPlanModel>> GetAllWorkingPlanByMonth(int month, int year)
         {
-            var query = "SELECT ShopCode, PlanDate, EmployeeCode FROM WorkingPlan WHERE YEAR(PlanDate) = @Year AND MONTH(PlanDate) = @Month ORDER BY PlanDate";
-            var workingPlans = await _connection.QueryAsync<WorkingPlanModel>(query, new { Month = month, Year = year });
+            
+            //  var query = "SELECT ShopCode, PlanDate, EmployeeCode FROM WorkingPlan WHERE YEAR(PlanDate) = @Year AND MONTH(PlanDate) = @Month ORDER BY PlanDate";
+            var workingPlans = await _connection.QueryAsync<WorkingPlanModel>("GetAllWorkingPlanByMonth", 
+                new { Month = month, Year = year },
+                commandType: CommandType.StoredProcedure);
             return workingPlans;
         }
     }

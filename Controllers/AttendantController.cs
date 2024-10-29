@@ -1,7 +1,6 @@
 ﻿using Attendant.Repository;
 using Microsoft.AspNetCore.Mvc;
 using Attendant.Models;
-using Attendant.Repository;
 using NPOI.XSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.HSSF.Util;
@@ -25,12 +24,14 @@ namespace Attendant.Controllers
             ViewBag.SelectedMonth = month ?? DateTime.Now.Month;
             ViewBag.SelectedYear = year ?? DateTime.Now.Year;
 
+            int currentPageSize = pageSize ?? 15;
+            int currentPageNumber = pageNumber ?? 1;
 
             var workingPlans = await _attendantRepository.GetAttendanceByMonthAndYear(
                 ViewBag.SelectedMonth,
                 ViewBag.SelectedYear,
-                pageSize.HasValue ? pageSize.Value : 15,
-                pageNumber.HasValue ? pageNumber.Value : 1
+                currentPageNumber,
+                currentPageSize
             );
 
             return View(workingPlans);
