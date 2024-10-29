@@ -5,6 +5,8 @@ using WorkingPlan.Repository;
 using System.IO;
 using OfficeOpenXml;
 using NPOI.XSSF.UserModel;
+using NPOI.HSSF.Util;
+using NPOI.SS.UserModel;
 
 
 namespace WorkingPlan.Controllers
@@ -48,11 +50,20 @@ namespace WorkingPlan.Controllers
 
                 var row = sheet.CreateRow(0);
                 int columnIndex = 0;
-                ///Tạo Header
+                var headerCellStyle = workbook.CreateCellStyle();
+                headerCellStyle.Alignment = HorizontalAlignment.Center;
+                headerCellStyle.VerticalAlignment = VerticalAlignment.Center;
+                headerCellStyle.FillForegroundColor = HSSFColor.Grey50Percent.Index;
+                headerCellStyle.FillPattern = FillPattern.SolidForeground;
+
+                //Tạo Header
                 foreach (var property in typeof(WorkingPlanModel).GetProperties())
                 {
-                    row.CreateCell(columnIndex++).SetCellValue(property.Name); 
+                    var cell = row.CreateCell(columnIndex++);
+                    cell.SetCellValue(property.Name);
+                    cell.CellStyle = headerCellStyle;
                 }
+
                 //Tạo hàng và thêm data vào ô
                 row = sheet.CreateRow(1);
                 int currentRowIndex = 1;
@@ -62,6 +73,7 @@ namespace WorkingPlan.Controllers
                     row.CreateCell(0).SetCellValue(plan.ShopCode);
                     row.CreateCell(1).SetCellValue(plan.PlanDate.ToString("dd-MM-yyyy"));
                     row.CreateCell(2).SetCellValue(plan.EmployeeCode);
+
                 }
 
                 using (var stream = new MemoryStream())
@@ -74,10 +86,5 @@ namespace WorkingPlan.Controllers
             }
         }
 
-        [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-        public IActionResult Error()
-        {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
-        }
     }
 }

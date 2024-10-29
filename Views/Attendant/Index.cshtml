@@ -26,7 +26,7 @@
                             </div>
                             <div class="col-md-6">
                                 <p>Year</p>
-                                @* Display from current year minus 7 years to current year *@
+                                @* Display from current year - 7 years to current year *@
                                 <select name="year" id="yearSelect"
                                         asp-items="@(new SelectList(Enumerable.Range(DateTime.Now.Year - 7, 8).Select(y => new { Value = y, Text = y.ToString() }), "Value", "Text", ViewBag.SelectedYear))"
                                         class="form-control">
@@ -95,6 +95,8 @@
             <p>
                 <a asp-action="ExportJsonToXls" asp-route-month="@ViewBag.SelectedMonth"
                    asp-route-year="@ViewBag.SelectedYear" class="btn btn-outline-secondary">Export</a>
+                <a asp-action="ExportAttendantsXlsxByDay" asp-route-month="@ViewBag.SelectedMonth"
+                   asp-route-year="@ViewBag.SelectedYear" class="btn btn-success">Export</a>
             </p>
         </div>
     </div>
